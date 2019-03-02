@@ -4,4 +4,4 @@ The project is divided into three parts
 - xgboost(train model)
 - order(Capital)
 
-Use `simple.py` to trade
+Use `simple_order.py` to trade
