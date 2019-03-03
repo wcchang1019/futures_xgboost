@@ -4,4 +4,9 @@ The project is divided into three parts
 - xgboost(train model)
 - order(Capital)
 
-Use `simple_order.py` to trade
+First, create a file `confidential.txt`, it's format should be like
+```
+Capital login ID
+Capital password
+```
+and use `simple_order.py` to trade
