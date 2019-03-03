@@ -52,32 +52,30 @@ def read_certificate():
 def get_account():
     try:
         stat = skO.GetUserAccount()
-        print("Order", stat, "GetUserAccount")
+        print('【 GetUserAccount successful 】')
     except Exception as e:
         print("error！", e)
 
 
-class SKOrderLibEvent:
-    __account_list = dict(
-        stock=[],
-        future=[],
-        sea_future=[],
-        foreign_stock=[],
-    )
+def get_open_position():
+    try:
+        stat = skO.GetOpenInterest(global_id, global_account[0])
+        print('【 GetOpenPosition successful 】')
+        print(global_open_interest)
+    except Exception as e:
+        print("error!", e)
 
+
+class SKOrderLibEvent:
     def OnAccount(self, bstrLogInID, bstrAccountData):
         strValues = bstrAccountData.split(',')
         strAccount = strValues[1] + strValues[3]
-        if strValues[0] == 'TS':
-            SKOrderLibEvent.__account_list['stock'].append(strAccount)
-        elif strValues[0] == 'TF':
-            SKOrderLibEvent.__account_list['future'].append(strAccount)
-        elif strValues[0] == 'OF':
-            SKOrderLibEvent.__account_list['sea_future'].append(strAccount)
-        elif strValues[0] == 'OS':
-            SKOrderLibEvent.__account_list['foreign_stock'].append(strAccount)
-    global global_account_list
-    global_account_list = __account_list
+        if strValues[0] == 'TF':
+            global_account.append(strAccount)
+
+    def OnOpenInterest(self, bstrData):
+        print(bstrData)  # why bstrData is empty ???
+        global_open_interest = bstrData.split(',')
 
 
 def send_order(buy_sell, b_async_order=False):
@@ -91,7 +89,7 @@ def send_order(buy_sell, b_async_order=False):
         盤中: sReserved = 0, T盤預約: sReserved = 1
         '''
         order = sk.FUTUREORDER()
-        order.bstrFullAccount = global_account_list['future'][0]
+        order.bstrFullAccount = global_account[0]
         order.bstrStockNo = 'MTX00'
         order.sBuySell = buy_sell
         order.sTradeType = 1
@@ -124,16 +122,24 @@ def daily_close_position():
         send_order(0)
 
 
+def daily_stop_loss_order():
+    print('sending stop loss order ...')
+
+
 if __name__ == '__main__':
+    global global_account, global_open_interest
+    global_account = []
+    global_open_interest = []
+    SKOrderEvent = SKOrderLibEvent()
+    SKOrderLibEventHandler = comtypes.client.GetEvents(skO, SKOrderEvent)
     login()
     order_initialize()
     read_certificate()
-    SKOrderEvent = SKOrderLibEvent()
-    SKOrderLibEventHandler = comtypes.client.GetEvents(skO, SKOrderEvent)
     get_account()
+    get_open_position()
     scheduler = BlockingScheduler()
-    scheduler.add_job(reload, 'cron', hour=7, minute=40, second=0)
+    # scheduler.add_job(reload, 'cron', hour=7, minute=40, second=0)
     scheduler.add_job(daily_open_position, 'cron', hour=8, minute=40, second=0)
-    scheduler.add_job(daily_close_position, 'cron', hour=13, minute=44, second=58)
+    # scheduler.add_job(daily_close_position, 'cron', hour=13, minute=44, second=58)
     scheduler.start()
 
