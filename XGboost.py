@@ -84,7 +84,7 @@ def train_model(plot=False):
     y_test = df.iloc[2030:, -1]
     model = XGBClassifier(learning_rate=0.005, n_estimators=500, max_depth=16, min_child_weight=1.4, gamma=0.1,
                           subsample=0.5, objective='multi:softprob', random_state=27, n_jobs=-1, silent=1)
-    model.fit(x_train, y_train, eval_set=[(x_test, y_test)], eval_metric="merror", early_stopping_rounds=50, verbose=True)
+    model.fit(x_train, y_train, eval_set=[(x_test, y_test)], eval_metric="merror", early_stopping_rounds=50, verbose=False)
     print('training set score: %.3f' % accuracy_score(model.predict(x_train), y_train))
     print('testing set score: %.3f' % accuracy_score(model.predict(x_test), y_test))
     y_pred = model.predict(x_test)
