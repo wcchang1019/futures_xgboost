@@ -10,3 +10,6 @@ Capital login ID
 Capital password
 ```
 and use `simple_order.py` to trade
+
+## performance
+![image](https://github.com/wcchang1019/futures_xgboost/blob/master/result.jpg)
